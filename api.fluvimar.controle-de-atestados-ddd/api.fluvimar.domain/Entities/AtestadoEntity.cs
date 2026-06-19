@@ -7,7 +7,7 @@ public sealed class AtestadoEntity : AbstractEntity
 {
     public int CodigoInterno { get; private set; }
     public String NomeFuncionario { get; private set; } = String.Empty;
-    public String CID {  get; private set; } = string.Empty;
+    public String? CID {  get; private set; }
     public DateTime? DiaAfastamento { get; private set; } 
     public DateTime? DiaRetorno { get; private set; }
     public int? TotalDiasFora => (DiaAfastamento.HasValue && DiaRetorno.HasValue) ?
@@ -18,19 +18,17 @@ public sealed class AtestadoEntity : AbstractEntity
     private AtestadoEntity() : base() { }
     public AtestadoEntity (string userId) : base(userId) { }
 
-    public void setObservacao (string observacao)
+    public void SetFuncionario(Funcionario funcionario)
     {
-        Observacoes = observacao?.ToUpper() ??
-        throw new ArgumentNullException(nameof(observacao));
-    }
+        Funcionario = funcionario ?? throw new ArgumentNullException(nameof(funcionario));
+        NomeFuncionario = funcionario.Nome;
 
-    public void setCID (string cid) 
+    }
+    public void SetCID (string? cid) 
     {
-        CID = cid ??
-            throw new ArgumentNullException(nameof(cid));
+        CID = cid;
     }
-
-    public void setDiaAfastamento (DateTime diaAfastamento)
+    public void SetDiaAfastamento (DateTime diaAfastamento)
     {
         if (diaAfastamento > DateTime.Now)
             throw new ArgumentException("O afastamento não pode ser no futuro.");
@@ -40,7 +38,7 @@ public sealed class AtestadoEntity : AbstractEntity
     
         DiaAfastamento = diaAfastamento;
     }
-    public void setDiaRetorno (DateTime diaRetorno)
+    public void SetDiaRetorno (DateTime diaRetorno)
     {
         if (diaRetorno > DiaAfastamento)
             throw new ArgumentException("O dia de retorno não pode ser anterior ao afastamento");
@@ -48,5 +46,9 @@ public sealed class AtestadoEntity : AbstractEntity
         if (DiaAfastamento != default && diaRetorno <= DiaAfastamento)
             throw new ArgumentException("O retorno não pode ser feito anterior ao afastamento");
     }
-
+    public void SetObservacao(string observacao)
+    {
+        Observacoes = observacao?.ToUpper() ??
+        throw new ArgumentNullException(nameof(observacao));
+    }
 }
