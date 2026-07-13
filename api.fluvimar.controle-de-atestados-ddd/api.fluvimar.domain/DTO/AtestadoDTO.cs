@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace api.fluvimar.domain.DTO
 {
@@ -13,15 +7,14 @@ namespace api.fluvimar.domain.DTO
     {
         public abstract class AbstractProdutoDTO
         {
-            [JsonPropertyName("nomeFuncionario")]
-            [Required(ErrorMessage ="O atributo nome é obrigatório.")]
-            [StringLength(255, MinimumLength = 3, ErrorMessage = "O nome deve ter entre 3 e 255 caracteres. ")]
-            public string NomeFuncionario { get; set; } = string.Empty;
+            [JsonPropertyName("funcionarioId")]
+            [Required(ErrorMessage = "O atributo funcionarioId é obrigatório.")]
+            public Guid FuncionarioId { get; set; }
 
             [JsonPropertyName("cid")]
-            [StringLength(6, MinimumLength = 2, ErrorMessage = "O .")]
-            public string CID { get; set; } = string.Empty;
-            
+            [StringLength(6, MinimumLength = 2, ErrorMessage = "O CID deve ter entre 2 e 6 caracteres.")]
+            public string? CID { get; set; }
+
             [JsonPropertyName("diaAfastamento")]
             [Required(ErrorMessage = "O atributo diaAfastamento é obrigatório.")]
             public DateTime? DiaAfastamento { get; set; }
@@ -32,17 +25,23 @@ namespace api.fluvimar.domain.DTO
 
             [JsonPropertyName("observacoes")]
             [MaxLength(500, ErrorMessage = "Observações deve ter no máximo 500 caracteres.")]
-            public string? Observacoes {  get; set; }
+            public string? Observacoes { get; set; }
         }
+
         public abstract class AbstractAtestadoWithIdDTO : AbstractProdutoDTO
         {
             [JsonPropertyName("id")]
             [Required(ErrorMessage = "O atributo id é obrigatório.")]
-            public Guid Id { get; set; } = Guid.Empty;
+            public Guid Id { get; set; }
         }
 
         public sealed class AtestadoRequest : AbstractProdutoDTO { }
         public sealed class AtestadoRequestWithId : AbstractAtestadoWithIdDTO { }
-        public sealed class AtestadoResponse : AbstractAtestadoWithIdDTO { }
+
+        public sealed class AtestadoResponse : AbstractAtestadoWithIdDTO
+        {
+            [JsonPropertyName("nomeFuncionario")]
+            public string NomeFuncionario { get; set; } = string.Empty;
+        }
     }
 }

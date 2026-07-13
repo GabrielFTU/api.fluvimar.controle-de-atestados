@@ -5,7 +5,7 @@ using api.fluvimar.infrastructure.Repositories.Commun;
 
 namespace api.fluvimar.infrastructure.Repositories;
 
-public sealed class FuncionarioRepository : AbstractRepositorio<Funcionario>, IFuncionarioRepositorio
+public sealed class SetorRepository : AbstractRepositorio<SetorEntity>, ISetorRepositorio
 {
-    public FuncionarioRepository(AppDbContext context) : base(context) { }
+    public SetorRepository(AppDbContext context) : base(context) { }
 }

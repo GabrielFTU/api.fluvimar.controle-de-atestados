@@ -1,3 +1,21 @@
-﻿namespace api.fluvimar.infrastructure.Data.Configurations;
+using api.fluvimar.domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class FuncionarioConfiguration { }
+namespace api.fluvimar.infrastructure.Data.Configurations;
+
+public sealed class FuncionarioConfiguration : IEntityTypeConfiguration<Funcionario>
+{
+    public void Configure(EntityTypeBuilder<Funcionario> builder)
+    {
+        builder.ToTable("Funcionarios");
+        builder.HasKey(f => f.Id);
+
+        builder.Property(f => f.CodigoInterno)
+            .ValueGeneratedOnAdd();
+
+        builder.Property(f => f.Nome)
+            .IsRequired()
+            .HasMaxLength(255);
+    }
+}

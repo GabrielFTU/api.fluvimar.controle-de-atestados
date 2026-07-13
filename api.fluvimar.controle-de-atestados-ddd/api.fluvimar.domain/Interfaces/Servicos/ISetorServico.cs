@@ -1,9 +1,4 @@
-﻿using api.fluvimar.domain.DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using api.fluvimar.domain.DTO;
 
 namespace api.fluvimar.domain.Interfaces.Servicos
 {
@@ -11,8 +6,8 @@ namespace api.fluvimar.domain.Interfaces.Servicos
     {
         Task<IEnumerable<SetorDTO.SetorResponse>> ObterTodosAsync();
         Task<SetorDTO.SetorResponse> ObterPorIdAsync(Guid id);
-        Task AdicionarAsync(SetorDTO.SetorRequest dto);
+        Task AdicionarAsync(SetorDTO.SetorRequest dto, string userId);
+        Task AtualizarAsync(SetorDTO.AbstractSetorWithIdDTO dto, string userId);
         Task RemoveAsync(Guid id);
-        Task AtualizarAsync(SetorDTO.AbstractSetorWithIdDTO);
     }
 }
