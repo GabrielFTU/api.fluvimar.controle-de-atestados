@@ -9,5 +9,6 @@ namespace api.fluvimar.domain.Interfaces.Repositorios
 {
     public interface IAtestadosRepositorio : IAbstractRepositorio<AtestadoEntity>
     {
+        Task<ICollection<AtestadoEntity>> ObterTodosComFuncionarioESetorAsync();
     }
 }

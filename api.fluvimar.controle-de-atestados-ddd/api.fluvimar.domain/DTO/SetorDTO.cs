@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using api.fluvimar.domain.Enums;
 
 namespace api.fluvimar.domain.DTO
 {
@@ -20,6 +21,9 @@ namespace api.fluvimar.domain.DTO
             [JsonPropertyName("responsavel")]
             [StringLength(255, MinimumLength = 3, ErrorMessage = "O atributo responsavel deve ter entre 3 e 255 caracteres. ")]
             public string? Responsavel { get; set; } = string.Empty;
+
+            [JsonPropertyName("unidade")]
+            public Unidade? Unidade { get; set; }
 
         }
 

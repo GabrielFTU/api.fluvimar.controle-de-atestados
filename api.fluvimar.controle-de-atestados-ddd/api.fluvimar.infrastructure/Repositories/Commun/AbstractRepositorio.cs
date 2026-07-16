@@ -16,10 +16,10 @@ public abstract class AbstractRepositorio<T> : IAbstractRepositorio<T> where T :
         DbSet = context.Set<T>();
     }
 
-    public async Task<ICollection<T>> ObterTodosAsync() =>
+    public virtual async Task<ICollection<T>> ObterTodosAsync() =>
         await DbSet.ToListAsync();
 
-    public async Task<T> ObterPorIdAsync(Guid id) =>
+    public virtual async Task<T> ObterPorIdAsync(Guid id) =>
         await DbSet.FindAsync(id)
             ?? throw new KeyNotFoundException($"{typeof(T).Name} com id {id} não encontrado.");
 

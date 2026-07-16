@@ -32,6 +32,9 @@ namespace api.fluvimar.infrastructure.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("character varying(6)");
 
+                    b.Property<int>("Classificacao")
+                        .HasColumnType("integer");
+
                     b.Property<int>("CodigoInterno")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
@@ -54,17 +57,33 @@ namespace api.fluvimar.infrastructure.Migrations
                     b.Property<Guid>("FuncionarioId")
                         .HasColumnType("uuid");
 
+                    b.Property<TimeSpan?>("HoraFim")
+                        .HasColumnType("interval");
+
+                    b.Property<TimeSpan?>("HoraInicio")
+                        .HasColumnType("interval");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<Guid?>("MedicoId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("NomeFuncionario")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("NomeMedico")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<string>("Observacoes")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TipoAtestado")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("timestamp with time zone");
@@ -77,7 +96,32 @@ namespace api.fluvimar.infrastructure.Migrations
 
                     b.HasIndex("FuncionarioId");
 
+                    b.HasIndex("MedicoId");
+
                     b.ToTable("Atestados", (string)null);
+                });
+
+            modelBuilder.Entity("api.fluvimar.domain.Entities.CidEntity", b =>
+                {
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)");
+
+                    b.Property<string>("Busca")
+                        .IsRequired()
+                        .HasMaxLength(520)
+                        .HasColumnType("character varying(520)");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Codigo");
+
+                    b.HasIndex("Busca");
+
+                    b.ToTable("Cids", (string)null);
                 });
 
             modelBuilder.Entity("api.fluvimar.domain.Entities.Funcionario", b =>
@@ -107,6 +151,9 @@ namespace api.fluvimar.infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<Guid?>("SetorId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -116,7 +163,52 @@ namespace api.fluvimar.infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SetorId");
+
                     b.ToTable("Funcionarios", (string)null);
+                });
+
+            modelBuilder.Entity("api.fluvimar.domain.Entities.MedicoEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CodigoInterno")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CodigoInterno"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Crm")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Medicos", (string)null);
                 });
 
             modelBuilder.Entity("api.fluvimar.domain.Entities.SetorEntity", b =>
@@ -150,6 +242,9 @@ namespace api.fluvimar.infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<int?>("Unidade")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -162,6 +257,54 @@ namespace api.fluvimar.infrastructure.Migrations
                     b.ToTable("Setores", (string)null);
                 });
 
+            modelBuilder.Entity("api.fluvimar.domain.Entities.Usuario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("SenhaHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Usuarios", (string)null);
+                });
+
             modelBuilder.Entity("api.fluvimar.domain.Entities.AtestadoEntity", b =>
                 {
                     b.HasOne("api.fluvimar.domain.Entities.Funcionario", "Funcionario")
@@ -170,7 +313,24 @@ namespace api.fluvimar.infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("api.fluvimar.domain.Entities.MedicoEntity", "Medico")
+                        .WithMany()
+                        .HasForeignKey("MedicoId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Funcionario");
+
+                    b.Navigation("Medico");
+                });
+
+            modelBuilder.Entity("api.fluvimar.domain.Entities.Funcionario", b =>
+                {
+                    b.HasOne("api.fluvimar.domain.Entities.SetorEntity", "Setor")
+                        .WithMany()
+                        .HasForeignKey("SetorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Setor");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,7 +6,7 @@ namespace api.fluvimar.domain.Interfaces.Servicos
     {
         Task<IEnumerable<FuncionarioDTO.FuncionarioResponse>> ObterTodosAsync();
         Task<FuncionarioDTO.FuncionarioResponse> ObterPorIdAsync(Guid id);
-        Task AdicionarAsync(FuncionarioDTO.FuncionarioRequest dto, string userId);
+        Task<FuncionarioDTO.FuncionarioResponse> AdicionarAsync(FuncionarioDTO.FuncionarioRequest dto, string userId);
         Task AtualizarAsync(FuncionarioDTO.AbstractFuncionarioWithIdDTO dto, string userId);
         Task RemoveAsync(Guid id);
     }

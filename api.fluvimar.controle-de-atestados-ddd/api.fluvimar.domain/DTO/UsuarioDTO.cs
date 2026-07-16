@@ -1,39 +1,71 @@
-﻿using api.fluvimar.domain.Entities.Commun;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace api.fluvimar.domain.DTO
 {
     public sealed class UsuarioDTO
     {
-        public abstract class AbstractUsuario { 
+        public sealed class LoginRequest
+        {
             [JsonPropertyName("email")]
-            [Required(ErrorMessage =" O atributo email é obrigatório.")]
+            [Required(ErrorMessage = "O atributo email é obrigatório.")]
             [EmailAddress(ErrorMessage = "O valor do atributo email é inválido.")]
-            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
             public string Email { get; set; } = string.Empty;
 
-            [JsonPropertyName("password")]
-            [Required(ErrorMessage = "O atributo password é obrigatório.")]
-            [PasswordPropertyText(true)]
-            [StringLength(50, MinimumLength = 6, ErrorMessage = "O atributo password deve ter entre 6 a 50 caracteres. ")]
-            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-            public string Password { get; set; } = string.Empty;
+            [JsonPropertyName("senha")]
+            [Required(ErrorMessage = "O atributo senha é obrigatório.")]
+            public string Senha { get; set; } = string.Empty;
         }
-        public sealed class SingInRequest : AbstractUsuario { }
-        public sealed class SingInResponse : AbstractUsuario
+
+        public sealed class UsuarioResponse
         {
-            [JsonPropertyName("confirmedPassword")]
-            [Compare(nameof(Password), ErrorMessage = "As senhas devem ser iguais")]
-            [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
-            public string AcessToken {  get; set; } = string.Empty ;
+            [JsonPropertyName("id")]
+            public Guid Id { get; set; }
+
+            [JsonPropertyName("nome")]
+            public string Nome { get; set; } = string.Empty;
+
+            [JsonPropertyName("email")]
+            public string Email { get; set; } = string.Empty;
+
+            [JsonPropertyName("isAdmin")]
+            public bool IsAdmin { get; set; }
+
+            [JsonPropertyName("isActive")]
+            public bool IsActive { get; set; }
+        }
+
+        public sealed class LoginResponse
+        {
+            [JsonPropertyName("token")]
+            public string Token { get; set; } = string.Empty;
+
+            [JsonPropertyName("expiraEm")]
+            public DateTime ExpiraEm { get; set; }
+
+            [JsonPropertyName("usuario")]
+            public UsuarioResponse Usuario { get; set; } = new();
+        }
+
+        public sealed class UsuarioCriarRequest
+        {
+            [JsonPropertyName("nome")]
+            [Required(ErrorMessage = "O atributo nome é obrigatório.")]
+            [StringLength(255, MinimumLength = 3, ErrorMessage = "O nome deve ter entre 3 e 255 caracteres.")]
+            public string Nome { get; set; } = string.Empty;
+
+            [JsonPropertyName("email")]
+            [Required(ErrorMessage = "O atributo email é obrigatório.")]
+            [EmailAddress(ErrorMessage = "O valor do atributo email é inválido.")]
+            public string Email { get; set; } = string.Empty;
+
+            [JsonPropertyName("senha")]
+            [Required(ErrorMessage = "O atributo senha é obrigatório.")]
+            [StringLength(50, MinimumLength = 8, ErrorMessage = "A senha deve ter entre 8 a 50 caracteres.")]
+            public string Senha { get; set; } = string.Empty;
+
+            [JsonPropertyName("isAdmin")]
+            public bool IsAdmin { get; set; }
         }
     }
 }

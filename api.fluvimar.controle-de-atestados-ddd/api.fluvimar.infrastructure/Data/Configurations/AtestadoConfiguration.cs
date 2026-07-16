@@ -30,11 +30,20 @@ public sealed class AtestadoConfiguration : IEntityTypeConfiguration<AtestadoEnt
         builder.Property(a => a.Observacoes)
             .HasMaxLength(500);
 
+        builder.Property(a => a.NomeMedico)
+            .HasMaxLength(255);
+
         builder.Ignore(a => a.TotalDiasFora);
+        builder.Ignore(a => a.TotalHoras);
 
         builder.HasOne(a => a.Funcionario)
             .WithMany()
             .HasForeignKey(a => a.FuncionarioId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(a => a.Medico)
+            .WithMany()
+            .HasForeignKey(a => a.MedicoId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

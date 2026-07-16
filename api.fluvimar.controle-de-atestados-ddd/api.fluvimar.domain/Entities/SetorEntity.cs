@@ -1,4 +1,5 @@
 ﻿using api.fluvimar.domain.Entities.Commun;
+using api.fluvimar.domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace api.fluvimar.domain.Entities
         public int CodigoInterno { get; private set; }
         public string NomeDoSetor { get; private set; } = String.Empty;
         public string? Responsavel { get; private set; } = String.Empty;
+        public Unidade? Unidade { get; private set; }
 
         private SetorEntity() : base() { }
 
@@ -24,6 +26,11 @@ namespace api.fluvimar.domain.Entities
         public void setResponsavel(string responsavel, string userId)
         {
             Responsavel = responsavel ?? throw new ArgumentNullException(nameof(responsavel));
+            Update(userId);
+        }
+        public void SetUnidade(Unidade? unidade, string userId)
+        {
+            Unidade = unidade;
             Update(userId);
         }
     }

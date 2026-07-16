@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using api.fluvimar.domain.Enums;
 
 namespace api.fluvimar.domain.DTO
 {
@@ -15,6 +16,15 @@ namespace api.fluvimar.domain.DTO
             [StringLength(6, MinimumLength = 2, ErrorMessage = "O CID deve ter entre 2 e 6 caracteres.")]
             public string? CID { get; set; }
 
+            [JsonPropertyName("tipoAtestado")]
+            public TipoAtestado TipoAtestado { get; set; } = TipoAtestado.DiaCompleto;
+
+            [JsonPropertyName("classificacao")]
+            public ClassificacaoAtestado Classificacao { get; set; } = ClassificacaoAtestado.Atestado;
+
+            [JsonPropertyName("medicoId")]
+            public Guid? MedicoId { get; set; }
+
             [JsonPropertyName("diaAfastamento")]
             [Required(ErrorMessage = "O atributo diaAfastamento é obrigatório.")]
             public DateTime? DiaAfastamento { get; set; }
@@ -22,6 +32,12 @@ namespace api.fluvimar.domain.DTO
             [JsonPropertyName("diaRetorno")]
             [Required(ErrorMessage = "O atributo diaRetorno é obrigatório.")]
             public DateTime? DiaRetorno { get; set; }
+
+            [JsonPropertyName("horaInicio")]
+            public TimeSpan? HoraInicio { get; set; }
+
+            [JsonPropertyName("horaFim")]
+            public TimeSpan? HoraFim { get; set; }
 
             [JsonPropertyName("observacoes")]
             [MaxLength(500, ErrorMessage = "Observações deve ter no máximo 500 caracteres.")]
@@ -42,6 +58,15 @@ namespace api.fluvimar.domain.DTO
         {
             [JsonPropertyName("nomeFuncionario")]
             public string NomeFuncionario { get; set; } = string.Empty;
+
+            [JsonPropertyName("nomeMedico")]
+            public string? NomeMedico { get; set; }
+
+            [JsonPropertyName("totalDiasFora")]
+            public int? TotalDiasFora { get; set; }
+
+            [JsonPropertyName("totalHoras")]
+            public double? TotalHoras { get; set; }
         }
     }
 }

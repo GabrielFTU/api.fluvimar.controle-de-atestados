@@ -17,5 +17,10 @@ public sealed class FuncionarioConfiguration : IEntityTypeConfiguration<Funciona
         builder.Property(f => f.Nome)
             .IsRequired()
             .HasMaxLength(255);
+
+        builder.HasOne(f => f.Setor)
+            .WithMany()
+            .HasForeignKey(f => f.SetorId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

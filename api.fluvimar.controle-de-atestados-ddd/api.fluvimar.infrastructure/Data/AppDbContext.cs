@@ -10,6 +10,9 @@ public sealed class AppDbContext : DbContext
     public DbSet<AtestadoEntity> Atestados => Set<AtestadoEntity>();
     public DbSet<Funcionario> Funcionarios => Set<Funcionario>();
     public DbSet<SetorEntity> Setores => Set<SetorEntity>();
+    public DbSet<CidEntity> Cids => Set<CidEntity>();
+    public DbSet<MedicoEntity> Medicos => Set<MedicoEntity>();
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

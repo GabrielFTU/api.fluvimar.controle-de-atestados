@@ -1,11 +1,14 @@
+using api.fluvimar.controle_de_atestados_ddd.Controllers.Extensions;
 using api.fluvimar.domain.DTO;
 using api.fluvimar.domain.Interfaces.Servicos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.fluvimar.controle_de_atestados_ddd.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class AtestadosController : ControllerBase
 {
     private readonly IAtestadoServico _atestadoServico;
@@ -24,19 +27,19 @@ public sealed class AtestadosController : ControllerBase
         Ok(await _atestadoServico.ObterPorIdAsync(id));
 
     [HttpPost]
-    public async Task<IActionResult> Adicionar(AtestadoDTO.AtestadoRequest dto, [FromHeader(Name = "X-User-Id")] string userId)
+    public async Task<IActionResult> Adicionar(AtestadoDTO.AtestadoRequest dto)
     {
-        await _atestadoServico.AdicionarAsync(dto, userId);
+        await _atestadoServico.AdicionarAsync(dto, this.UsuarioId());
         return StatusCode(StatusCodes.Status201Created);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Atualizar(Guid id, AtestadoDTO.AtestadoRequestWithId dto, [FromHeader(Name = "X-User-Id")] string userId)
+    public async Task<IActionResult> Atualizar(Guid id, AtestadoDTO.AtestadoRequestWithId dto)
     {
         if (id != dto.Id)
             return BadRequest("O id da rota não corresponde ao id do corpo da requisição.");
 
-        await _atestadoServico.AtualizarAsync(dto, userId);
+        await _atestadoServico.AtualizarAsync(dto, this.UsuarioId());
         return NoContent();
     }
 

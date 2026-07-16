@@ -52,6 +52,7 @@ public sealed class SetorServico : ISetorServico
     {
         setor.setNomeDoSetor(dto.NomeDoSetor, userId);
         setor.setResponsavel(dto.Responsavel ?? string.Empty, userId);
+        setor.SetUnidade(dto.Unidade, userId);
     }
 
     private static SetorDTO.SetorResponse MapearParaResponse(SetorEntity setor) =>
@@ -59,6 +60,7 @@ public sealed class SetorServico : ISetorServico
         {
             Id = setor.Id,
             NomeDoSetor = setor.NomeDoSetor,
-            Responsavel = setor.Responsavel
+            Responsavel = setor.Responsavel,
+            Unidade = setor.Unidade
         };
 }
