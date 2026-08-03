@@ -5,6 +5,11 @@ export function formatarData(data: string | null): string {
 }
 
 export function formatarHoras(horas: number | null | undefined): string {
-  const valor = Math.round((horas ?? 0) * 10) / 10
-  return `${valor.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 1 })}h`
+  const totalMinutos = Math.round((horas ?? 0) * 60)
+  const h = Math.floor(totalMinutos / 60)
+  const m = totalMinutos % 60
+
+  if (h === 0) return `${m}min`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}min`
 }
