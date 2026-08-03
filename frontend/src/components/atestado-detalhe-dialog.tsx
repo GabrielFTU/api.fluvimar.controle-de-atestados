@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom"
 import { ArrowUpRight } from "lucide-react"
 
 import type { AtestadoDetalheItem, ClassificacaoAtestado } from "@/lib/types"
-import { formatarData } from "@/lib/format"
+import { formatarData, formatarHoras } from "@/lib/format"
+import { variantePorClassificacao } from "@/lib/badge-variants"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -61,6 +62,7 @@ export function AtestadoDetalheDialog({
               <TableRow>
                 <TableHead>Funcionário</TableHead>
                 <TableHead>Classificação</TableHead>
+                <TableHead>CID</TableHead>
                 <TableHead>Médico</TableHead>
                 <TableHead>Setor</TableHead>
                 <TableHead>Afastamento</TableHead>
@@ -73,30 +75,44 @@ export function AtestadoDetalheDialog({
               {carregando ? (
                 Array.from({ length: 4 }).map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell colSpan={8}>
+                    <TableCell colSpan={9}>
                       <Skeleton className="h-5 w-full" />
                     </TableCell>
                   </TableRow>
                 ))
               ) : itens.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-muted-foreground h-24 text-center">
+                  <TableCell colSpan={9} className="text-muted-foreground h-24 text-center">
                     Nenhum atestado encontrado.
                   </TableCell>
                 </TableRow>
               ) : (
                 itens.map((item) => (
                   <TableRow key={item.atestadoId}>
-                    <TableCell className="font-medium">{item.nomeFuncionario}</TableCell>
+                    <TableCell className="max-w-40 truncate font-medium">{item.nomeFuncionario}</TableCell>
                     <TableCell>
-                      <Badge variant={item.classificacao === "Atestado" ? "secondary" : "outline"}>
+                      <Badge variant={variantePorClassificacao(item.classificacao)}>
                         {CLASSIFICACAO_LABEL[item.classificacao]}
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      {item.cid ? (
+                        <>
+                          <span className="font-medium">{item.cid}</span>
+                          {item.cidDescricao && (
+                            <span className="text-muted-foreground ml-1.5 text-xs">
+                              {item.cidDescricao}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="max-w-32 truncate">
                       {item.nomeMedico ?? <span className="text-muted-foreground">—</span>}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-32 truncate">
                       {item.nomeDoSetor ?? (
                         <span className="text-muted-foreground">Sem setor</span>
                       )}
@@ -106,7 +122,7 @@ export function AtestadoDetalheDialog({
                     <TableCell className="text-right">
                       {item.tipoAtestado === "Horario" ? (
                         <div className="flex items-center justify-end gap-1.5">
-                          <Badge variant="secondary">{item.totalHoras ?? 0}h</Badge>
+                          <Badge variant="secondary">{formatarHoras(item.totalHoras)}</Badge>
                           <span className="text-muted-foreground text-xs">
                             {item.horaInicio?.slice(0, 5)}–{item.horaFim?.slice(0, 5)}
                           </span>

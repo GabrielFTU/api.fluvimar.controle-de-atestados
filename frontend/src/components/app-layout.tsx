@@ -15,6 +15,8 @@ const TITULOS_POR_ROTA: Record<string, string> = {
   "/atestados": "Atestados",
   "/estatisticas/geral": "Estatísticas gerais",
   "/estatisticas/funcionario": "Estatísticas por funcionário",
+  "/relatorios/setor": "Relatório por unidade/setor",
+  "/relatorios/funcionario": "Relatório individual",
   "/usuarios": "Usuários",
 }
 
@@ -36,7 +38,7 @@ export function AppLayout() {
     <SidebarProvider defaultOpen={lerSidebarPersistida()}>
       <AppSidebar />
       <SidebarInset>
-        <header className="bg-background/95 supports-backdrop-filter:bg-background/70 sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 backdrop-blur-sm">
+        <header className="bg-background/95 supports-backdrop-filter:bg-background/70 sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 backdrop-blur-sm print:hidden">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-5" />
           <h2 className="text-sm font-medium">{tituloDaPagina(location.pathname)}</h2>
@@ -52,7 +54,7 @@ export function AppLayout() {
             </Button>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
+        <main className="min-w-0 flex-1 overflow-auto p-6 print:overflow-visible print:p-0">
           <Outlet />
         </main>
       </SidebarInset>

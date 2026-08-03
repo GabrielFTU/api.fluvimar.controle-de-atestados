@@ -10,20 +10,20 @@ namespace api.fluvimar.domain.Interfaces.Servicos
         Task<IEnumerable<EstatisticaDTO.SerieMensalItem>> ObterSerieMensalAsync(
             int ano, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
         Task<IEnumerable<EstatisticaDTO.DiaSemanaItem>> ObterPorDiaSemanaAsync(
-            int? ano, int? mes, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
+            int? ano, int[]? meses, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
         Task<IEnumerable<EstatisticaDTO.SetorItem>> ObterPorSetorAsync(
-            int? ano, int? mes, Unidade? unidade, ClassificacaoAtestado? classificacao);
+            int? ano, int[]? meses, Unidade? unidade, ClassificacaoAtestado? classificacao);
         Task<IEnumerable<EstatisticaDTO.TopFuncionarioItem>> ObterTopFuncionariosAsync(
-            int ano, int? mes, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
+            int ano, int[]? meses, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
         Task<IEnumerable<EstatisticaDTO.TopCidItem>> ObterTopCidsAsync(
-            int? ano, int? mes, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
+            int? ano, int[]? meses, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
         Task<IEnumerable<EstatisticaDTO.TopMedicoItem>> ObterTopMedicosAsync(
-            int? ano, int? mes, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
-        Task<EstatisticaDTO.FuncionarioEstatisticaResponse> ObterPorFuncionarioAsync(Guid funcionarioId, int? ano, int? mes);
+            int? ano, int[]? meses, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao);
+        Task<EstatisticaDTO.FuncionarioEstatisticaResponse> ObterPorFuncionarioAsync(Guid funcionarioId, int? ano, int[]? meses);
         Task<IEnumerable<EstatisticaDTO.AtestadoDetalheItem>> ObterDetalheAtestadosAsync(
             string? cid, Guid? setorId, bool semSetor, Guid? funcionarioId, Guid? medicoId,
-            ClassificacaoAtestado? classificacao, Unidade? unidade, int? ano, int? mes,
-            bool apenasAtivos, int? diasMinimosAfastamento);
+            ClassificacaoAtestado? classificacao, Unidade? unidade, int? ano, int[]? meses,
+            bool apenasAtivos, int? diasMinimosAfastamento, bool apenasHoje = false);
         Task<IEnumerable<EstatisticaDTO.ReincidenteItem>> ObterReincidentesAsync(int meses, int minimoAtestados);
     }
 }

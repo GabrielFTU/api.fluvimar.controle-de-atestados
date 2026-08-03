@@ -27,11 +27,14 @@ import type {
   Unidade,
 } from "@/lib/types"
 import { DIAS_SEMANA, MESES } from "@/lib/stats"
+import { formatarHoras } from "@/lib/format"
 import { KpiCard } from "@/components/kpi-card"
 import { TrendBadge } from "@/components/trend-badge"
 import { StatTrendChart } from "@/components/stat-trend-chart"
 import { StatBarChart } from "@/components/stat-bar-chart"
 import { AtestadoDetalheDialog } from "@/components/atestado-detalhe-dialog"
+import { MesMultiSelect } from "@/components/mes-multi-select"
+import { LimparFiltrosLink } from "@/components/limpar-filtros-link"
 import {
   Select,
   SelectContent,
@@ -50,7 +53,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const TODOS_OS_MESES = "todos"
 const TODAS_AS_UNIDADES = "todas"
 const TODOS_OS_SETORES = "todos"
 const TODAS_AS_CLASSIFICACOES = "todas"
@@ -71,7 +73,7 @@ export function EstatisticasGeralPage() {
   const navigate = useNavigate()
   const [anos, setAnos] = useState<number[]>([new Date().getUTCFullYear()])
   const [ano, setAno] = useState<number>(new Date().getUTCFullYear())
-  const [mes, setMes] = useState<string>(TODOS_OS_MESES)
+  const [meses, setMeses] = useState<number[]>([])
   const [unidade, setUnidade] = useState<string>(TODAS_AS_UNIDADES)
   const [setorId, setSetorId] = useState<string>(TODOS_OS_SETORES)
   const [classificacao, setClassificacao] = useState<string>(TODAS_AS_CLASSIFICACOES)
@@ -135,15 +137,14 @@ export function EstatisticasGeralPage() {
   useEffect(() => {
     let ativo = true
     setCarregando(true)
-    const mesNumero = mes === TODOS_OS_MESES ? undefined : Number(mes)
 
     Promise.all([
       estatisticasApi.serieMensal(ano, filtroComum),
-      estatisticasApi.porDiaSemana(ano, mesNumero, filtroComum),
-      estatisticasApi.porSetor(ano, mesNumero, filtroComum),
-      estatisticasApi.topFuncionarios(ano, mesNumero, 10, filtroComum),
-      estatisticasApi.topCids(ano, mesNumero, 10, filtroComum),
-      estatisticasApi.topMedicos(ano, mesNumero, 10, filtroComum),
+      estatisticasApi.porDiaSemana(ano, meses, filtroComum),
+      estatisticasApi.porSetor(ano, meses, filtroComum),
+      estatisticasApi.topFuncionarios(ano, meses, 10, filtroComum),
+      estatisticasApi.topCids(ano, meses, 10, filtroComum),
+      estatisticasApi.topMedicos(ano, meses, 10, filtroComum),
     ])
       .then(([serie, diaSemana, porSetorResp, ranking, cids, medicos]) => {
         if (!ativo) return
@@ -164,11 +165,16 @@ export function EstatisticasGeralPage() {
     return () => {
       ativo = false
     }
-  }, [ano, mes, filtroComum])
+  }, [ano, meses, filtroComum])
 
   const maiorQuantidadeSetor = useMemo(
     () => Math.max(1, ...porSetor.map((item) => item.quantidade)),
     [porSetor]
+  )
+
+  const maiorQuantidadeFuncionario = useMemo(
+    () => Math.max(1, ...topFuncionarios.map((item) => item.quantidade)),
+    [topFuncionarios]
   )
 
   function abrirDetalhe(titulo: string, descricao: string | undefined, filtro: DetalheAtestadosFiltro) {
@@ -189,7 +195,7 @@ export function EstatisticasGeralPage() {
       setorId: item.setorId ?? undefined,
       semSetor: !item.setorId,
       ano,
-      mes: mes === TODOS_OS_MESES ? undefined : Number(mes),
+      meses,
     })
   }
 
@@ -198,7 +204,7 @@ export function EstatisticasGeralPage() {
       ...filtroComum,
       funcionarioId: item.funcionarioId,
       ano,
-      mes: mes === TODOS_OS_MESES ? undefined : Number(mes),
+      meses,
     })
   }
 
@@ -206,7 +212,7 @@ export function EstatisticasGeralPage() {
     abrirDetalhe(
       `CID ${item.cid}`,
       item.descricao ? `${item.descricao} · Atestados de ${ano}` : `Atestados de ${ano}`,
-      { ...filtroComum, cid: item.cid, ano, mes: mes === TODOS_OS_MESES ? undefined : Number(mes) }
+      { ...filtroComum, cid: item.cid, ano, meses }
     )
   }
 
@@ -214,8 +220,12 @@ export function EstatisticasGeralPage() {
     abrirDetalhe(
       item.nomeMedico,
       item.crm ? `CRM ${item.crm} · Atestados de ${ano}` : `Atestados de ${ano}`,
-      { ...filtroComum, medicoId: item.medicoId, ano, mes: mes === TODOS_OS_MESES ? undefined : Number(mes) }
+      { ...filtroComum, medicoId: item.medicoId, ano, meses }
     )
+  }
+
+  function abrirDetalheHoje() {
+    abrirDetalhe("Atestados de hoje", undefined, { apenasHoje: true })
   }
 
   function abrirDetalheAcimaDe15Dias() {
@@ -230,10 +240,7 @@ export function EstatisticasGeralPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Estatísticas gerais</h1>
-          <p className="text-muted-foreground text-sm">
-            Visão consolidada de atestados da empresa.
-          </p>
+          <h1 className="text-xl font-semibold tracking-tight">Estatísticas gerais</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={unidade} onValueChange={setUnidade}>
@@ -275,19 +282,7 @@ export function EstatisticasGeralPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={mes} onValueChange={setMes}>
-            <SelectTrigger className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TODOS_OS_MESES}>Todos os meses</SelectItem>
-              {MESES.map((nomeMes, index) => (
-                <SelectItem key={nomeMes} value={String(index)}>
-                  {nomeMes}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MesMultiSelect value={meses} onChange={setMeses} />
           <Select value={String(ano)} onValueChange={(valor) => setAno(Number(valor))}>
             <SelectTrigger className="w-24">
               <SelectValue />
@@ -300,6 +295,15 @@ export function EstatisticasGeralPage() {
               ))}
             </SelectContent>
           </Select>
+          <LimparFiltrosLink
+            onClick={() => {
+              setUnidade(TODAS_AS_UNIDADES)
+              setSetorId(TODOS_OS_SETORES)
+              setClassificacao(TODAS_AS_CLASSIFICACOES)
+              setMeses([])
+              setAno(new Date().getUTCFullYear())
+            }}
+          />
         </div>
       </div>
 
@@ -310,6 +314,7 @@ export function EstatisticasGeralPage() {
               label="Atestados hoje"
               value={resumo.atestadosHoje}
               icon={ClipboardList}
+              onClick={resumo.atestadosHoje > 0 ? abrirDetalheHoje : undefined}
               trend={
                 <TrendBadge
                   atual={resumo.atestadosHoje}
@@ -370,7 +375,7 @@ export function EstatisticasGeralPage() {
             />
             <KpiCard
               label="Horas atestadas no mês"
-              value={`${resumo.horasAtestadasMesAtual}h`}
+              value={formatarHoras(resumo.horasAtestadasMesAtual)}
               icon={Clock}
               trend={
                 <div className="flex flex-col gap-1">
@@ -449,36 +454,42 @@ export function EstatisticasGeralPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-normal">Atestados por setor</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+          <CardContent className="flex max-h-96 flex-col gap-3 overflow-y-auto">
             {carregando ? (
               <Skeleton className="h-24 w-full" />
             ) : porSetor.length === 0 ? (
               <p className="text-muted-foreground text-sm">Nenhum atestado no período.</p>
             ) : (
-              porSetor.map((item) => (
-                <button
-                  key={item.setorId ?? "sem-setor"}
-                  type="button"
-                  onClick={() => abrirDetalheSetor(item)}
-                  className="hover:bg-muted flex flex-col gap-1 rounded-md px-1.5 py-1 text-left"
-                >
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="truncate">{item.nomeDoSetor}</span>
-                    <span className="text-muted-foreground tabular-nums">{item.quantidade}</span>
-                  </div>
-                  <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-                    <div
-                      className="bg-chart-1 h-full rounded-full"
-                      style={{ width: `${(item.quantidade / maiorQuantidadeSetor) * 100}%` }}
-                    />
-                  </div>
-                </button>
-              ))
+              porSetor.map((item) => {
+                const proporcao = item.quantidade / maiorQuantidadeSetor
+                return (
+                  <button
+                    key={item.setorId ?? "sem-setor"}
+                    type="button"
+                    onClick={() => abrirDetalheSetor(item)}
+                    className="hover:bg-muted flex flex-col gap-1 rounded-md px-1.5 py-1 text-left"
+                  >
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="truncate">{item.nomeDoSetor}</span>
+                      <span className="text-muted-foreground tabular-nums">{item.quantidade}</span>
+                    </div>
+                    <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+                      <div
+                        className="bg-chart-1 h-full rounded-full"
+                        style={{
+                          width: `${proporcao * 100}%`,
+                          opacity: Math.max(0.35, proporcao),
+                        }}
+                      />
+                    </div>
+                  </button>
+                )
+              })
             )}
           </CardContent>
         </Card>
@@ -487,9 +498,9 @@ export function EstatisticasGeralPage() {
           <CardHeader>
             <CardTitle className="text-sm font-normal">Top funcionários</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-96 overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-card sticky top-0 z-10">
                 <TableRow>
                   <TableHead className="w-8">#</TableHead>
                   <TableHead>Funcionário</TableHead>
@@ -512,17 +523,33 @@ export function EstatisticasGeralPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  topFuncionarios.map((item, index) => (
-                    <TableRow
-                      key={item.funcionarioId}
-                      className="hover:bg-muted cursor-pointer"
-                      onClick={() => abrirDetalheFuncionario(item)}
-                    >
-                      <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                      <TableCell className="truncate">{item.nomeFuncionario}</TableCell>
-                      <TableCell className="text-right tabular-nums">{item.quantidade}</TableCell>
-                    </TableRow>
-                  ))
+                  topFuncionarios.map((item, index) => {
+                    const proporcao = item.quantidade / maiorQuantidadeFuncionario
+                    return (
+                      <TableRow
+                        key={item.funcionarioId}
+                        className="hover:bg-muted cursor-pointer"
+                        onClick={() => abrirDetalheFuncionario(item)}
+                      >
+                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span className="truncate">{item.nomeFuncionario}</span>
+                            <div className="bg-muted h-1 w-full overflow-hidden rounded-full">
+                              <div
+                                className="bg-chart-1 h-full rounded-full"
+                                style={{
+                                  width: `${proporcao * 100}%`,
+                                  opacity: Math.max(0.35, proporcao),
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{item.quantidade}</TableCell>
+                      </TableRow>
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
@@ -533,9 +560,9 @@ export function EstatisticasGeralPage() {
           <CardHeader>
             <CardTitle className="text-sm font-normal">Top CIDs</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-96 overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-card sticky top-0 z-10">
                 <TableRow>
                   <TableHead className="w-8">#</TableHead>
                   <TableHead>CID</TableHead>
@@ -593,9 +620,9 @@ export function EstatisticasGeralPage() {
             <Stethoscope className="text-muted-foreground size-4" />
             <CardTitle className="text-sm font-normal">Top médicos</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-96 overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-card sticky top-0 z-10">
                 <TableRow>
                   <TableHead className="w-8">#</TableHead>
                   <TableHead>Médico</TableHead>

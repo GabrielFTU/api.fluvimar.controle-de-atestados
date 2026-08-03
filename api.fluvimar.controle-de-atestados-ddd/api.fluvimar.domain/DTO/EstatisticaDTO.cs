@@ -136,6 +136,12 @@ namespace api.fluvimar.domain.DTO
             [JsonPropertyName("nomeDoSetor")]
             public string? NomeDoSetor { get; set; }
 
+            [JsonPropertyName("cid")]
+            public string? Cid { get; set; }
+
+            [JsonPropertyName("cidDescricao")]
+            public string? CidDescricao { get; set; }
+
             [JsonPropertyName("tipoAtestado")]
             public TipoAtestado TipoAtestado { get; set; }
 

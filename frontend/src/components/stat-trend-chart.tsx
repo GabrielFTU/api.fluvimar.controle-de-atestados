@@ -9,6 +9,7 @@ import {
 } from "recharts"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { calcularLarguraEixoY } from "@/lib/charts"
 
 type StatTrendChartProps = {
   titulo: string
@@ -50,7 +51,7 @@ export function StatTrendChart({
               allowDecimals={false}
               tickLine={false}
               axisLine={false}
-              width={32}
+              width={calcularLarguraEixoY(dados, chaveValor)}
               tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
             />
             <Tooltip

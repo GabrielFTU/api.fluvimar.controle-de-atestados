@@ -7,13 +7,15 @@ import { toast } from "sonner"
 import { atestadosApi, estatisticasApi, funcionariosApi, setoresApi } from "@/lib/api"
 import type { Atestado, Funcionario, Setor, Unidade } from "@/lib/types"
 import { DIAS_SEMANA, MESES } from "@/lib/stats"
-import { formatarData } from "@/lib/format"
+import { formatarData, formatarHoras } from "@/lib/format"
 import { Badge } from "@/components/ui/badge"
 import { KpiCard } from "@/components/kpi-card"
 import { StatTrendChart } from "@/components/stat-trend-chart"
 import { StatBarChart } from "@/components/stat-bar-chart"
 import { DataTable } from "@/components/data-table"
 import { FuncionarioCombobox } from "@/components/funcionario-combobox"
+import { MesMultiSelect } from "@/components/mes-multi-select"
+import { LimparFiltrosLink } from "@/components/limpar-filtros-link"
 import {
   Select,
   SelectContent,
@@ -31,7 +33,6 @@ type FuncionarioResumo = {
   ultimoAtestado: string | null
 }
 
-const TODOS_OS_MESES = "todos"
 const TODAS_AS_UNIDADES = "todas"
 const TODOS_OS_SETORES = "todos"
 
@@ -48,7 +49,7 @@ export function EstatisticasFuncionarioPage() {
   const [funcionarioId, setFuncionarioId] = useState<string>(searchParams.get("funcionarioId") ?? "")
   const [anos, setAnos] = useState<number[]>([new Date().getUTCFullYear()])
   const [ano, setAno] = useState<number>(new Date().getUTCFullYear())
-  const [mes, setMes] = useState<string>(TODOS_OS_MESES)
+  const [meses, setMeses] = useState<number[]>([])
   const [unidade, setUnidade] = useState<string>(TODAS_AS_UNIDADES)
   const [setorId, setSetorId] = useState<string>(TODOS_OS_SETORES)
   const [carregando, setCarregando] = useState(true)
@@ -120,9 +121,8 @@ export function EstatisticasFuncionarioPage() {
 
     let ativo = true
     setCarregando(true)
-    const mesNumero = mes === TODOS_OS_MESES ? undefined : Number(mes)
 
-    Promise.all([estatisticasApi.porFuncionario(funcionarioId, ano, mesNumero), atestadosApi.listar()])
+    Promise.all([estatisticasApi.porFuncionario(funcionarioId, ano, meses), atestadosApi.listar()])
       .then(([dados, todosAtestados]) => {
         if (!ativo) return
         setResumo({
@@ -144,8 +144,8 @@ export function EstatisticasFuncionarioPage() {
         setAtestados(
           todosAtestados.filter((atestado) => {
             if (atestado.funcionarioId !== funcionarioId) return false
-            if (mesNumero === undefined || !atestado.diaAfastamento) return true
-            return new Date(atestado.diaAfastamento).getUTCMonth() + 1 === mesNumero
+            if (meses.length === 0 || !atestado.diaAfastamento) return true
+            return meses.includes(new Date(atestado.diaAfastamento).getUTCMonth() + 1)
           })
         )
       })
@@ -157,7 +157,7 @@ export function EstatisticasFuncionarioPage() {
     return () => {
       ativo = false
     }
-  }, [funcionarioId, ano, mes])
+  }, [funcionarioId, ano, meses])
 
   const columns = useMemo<ColumnDef<Atestado, unknown>[]>(
     () => [
@@ -186,7 +186,7 @@ export function EstatisticasFuncionarioPage() {
           if (atestado.tipoAtestado === "Horario") {
             return (
               <div className="flex items-center gap-1.5">
-                <Badge variant="secondary">{atestado.totalHoras ?? 0}h</Badge>
+                <Badge variant="secondary">{formatarHoras(atestado.totalHoras)}</Badge>
                 <span className="text-muted-foreground text-xs">
                   {atestado.horaInicio?.slice(0, 5)}–{atestado.horaFim?.slice(0, 5)}
                 </span>
@@ -202,8 +202,8 @@ export function EstatisticasFuncionarioPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Estatísticas por funcionário</h1>
+      <div className="space-y-0.5">
+        <h1 className="text-xl font-semibold tracking-tight">Estatísticas por funcionário</h1>
         <p className="text-muted-foreground text-sm">
           Histórico individual de atestados e afastamentos.
         </p>
@@ -248,19 +248,7 @@ export function EstatisticasFuncionarioPage() {
             placeholder="Selecione um funcionário"
           />
         </div>
-        <Select value={mes} onValueChange={setMes}>
-          <SelectTrigger className="w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={TODOS_OS_MESES}>Todos os meses</SelectItem>
-            {MESES.map((nomeMes, index) => (
-              <SelectItem key={nomeMes} value={String(index)}>
-                {nomeMes}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MesMultiSelect value={meses} onChange={setMeses} />
         <Select value={String(ano)} onValueChange={(valor) => setAno(Number(valor))}>
           <SelectTrigger className="w-28">
             <SelectValue />
@@ -273,6 +261,14 @@ export function EstatisticasFuncionarioPage() {
             ))}
           </SelectContent>
         </Select>
+        <LimparFiltrosLink
+          onClick={() => {
+            setUnidade(TODAS_AS_UNIDADES)
+            setSetorId(TODOS_OS_SETORES)
+            setMeses([])
+            setAno(new Date().getUTCFullYear())
+          }}
+        />
       </div>
 
       {!funcionarioId ? (
@@ -285,18 +281,18 @@ export function EstatisticasFuncionarioPage() {
             {resumo ? (
               <>
                 <KpiCard
-                  label={mes === TODOS_OS_MESES ? "Atestados no ano" : "Atestados no período"}
+                  label={meses.length === 0 ?"Atestados no ano" : "Atestados no período"}
                   value={resumo.totalAtestados}
                   icon={ClipboardList}
                 />
                 <KpiCard
-                  label={mes === TODOS_OS_MESES ? "Dias afastado no ano" : "Dias afastado no período"}
+                  label={meses.length === 0 ?"Dias afastado no ano" : "Dias afastado no período"}
                   value={resumo.totalDiasAfastado}
                   icon={CalendarClock}
                 />
                 <KpiCard
-                  label={mes === TODOS_OS_MESES ? "Horas atestadas no ano" : "Horas atestadas no período"}
-                  value={`${resumo.totalHorasAfastado}h`}
+                  label={meses.length === 0 ?"Horas atestadas no ano" : "Horas atestadas no período"}
+                  value={formatarHoras(resumo.totalHorasAfastado)}
                   icon={Clock}
                   hint="Atestados de horário específico"
                 />

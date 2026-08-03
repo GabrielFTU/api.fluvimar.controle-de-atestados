@@ -140,3 +140,17 @@
     @apply font-sans;
     }
 }
+
+@page {
+  size: A4 landscape;
+  margin: 12mm;
+}
+
+@media print {
+  .relatorio-imprimivel thead {
+    display: table-header-group;
+  }
+  .relatorio-imprimivel tr {
+    break-inside: avoid;
+  }
+}

@@ -5,13 +5,14 @@ import { toast } from "sonner"
 
 import { atestadosApi, funcionariosApi } from "@/lib/api"
 import type { Atestado, Funcionario } from "@/lib/types"
-import { formatarData } from "@/lib/format"
+import { formatarData, formatarHoras } from "@/lib/format"
 import { exportarCsv } from "@/lib/csv"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { KpiCard } from "@/components/kpi-card"
 import { DataTable } from "@/components/data-table"
 import { FuncionarioCombobox } from "@/components/funcionario-combobox"
+import { LimparFiltrosLink } from "@/components/limpar-filtros-link"
 
 const TODOS_OS_FUNCIONARIOS = "todos"
 
@@ -69,7 +70,7 @@ export function ApontamentosPage() {
         cabecalho: "Duração",
         valor: (atestado) =>
           atestado.tipoAtestado === "Horario"
-            ? `${atestado.totalHoras ?? 0}h`
+            ? formatarHoras(atestado.totalHoras)
             : String(atestado.totalDiasFora ?? ""),
       },
       { cabecalho: "Observações", valor: (atestado) => atestado.observacoes ?? "" },
@@ -107,7 +108,7 @@ export function ApontamentosPage() {
         if (atestado.tipoAtestado === "Horario") {
           return (
             <div className="flex items-center gap-1.5">
-              <Badge variant="secondary">{atestado.totalHoras ?? 0}h</Badge>
+              <Badge variant="secondary">{formatarHoras(atestado.totalHoras)}</Badge>
               <span className="text-muted-foreground text-xs">
                 {atestado.horaInicio?.slice(0, 5)}–{atestado.horaFim?.slice(0, 5)}
               </span>
@@ -130,8 +131,8 @@ export function ApontamentosPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Apontamentos</h1>
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-semibold tracking-tight">Apontamentos</h1>
           <p className="text-muted-foreground text-sm">Consulta de atestados por funcionário.</p>
         </div>
         <Button variant="outline" onClick={exportar}>
@@ -150,6 +151,7 @@ export function ApontamentosPage() {
             opcaoExtra={{ value: TODOS_OS_FUNCIONARIOS, label: "Todos os funcionários" }}
           />
         </div>
+        <LimparFiltrosLink onClick={() => setFuncionarioId(TODOS_OS_FUNCIONARIOS)} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -159,7 +161,7 @@ export function ApontamentosPage() {
           icon={ClipboardList}
         />
         <KpiCard label="Dias afastado (total)" value={totalDias} icon={CalendarClock} />
-        <KpiCard label="Horas atestadas (total)" value={`${totalHoras}h`} icon={Clock} />
+        <KpiCard label="Horas atestadas (total)" value={formatarHoras(totalHoras)} icon={Clock} />
       </div>
 
       <DataTable

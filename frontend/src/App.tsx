@@ -29,6 +29,12 @@ const EstatisticasFuncionarioPage = lazy(() =>
 const UsuariosPage = lazy(() =>
   import("@/pages/usuarios-page").then((m) => ({ default: m.UsuariosPage }))
 )
+const RelatorioSetorPage = lazy(() =>
+  import("@/pages/relatorio-setor-page").then((m) => ({ default: m.RelatorioSetorPage }))
+)
+const RelatorioColaboradorPage = lazy(() =>
+  import("@/pages/relatorio-colaborador-page").then((m) => ({ default: m.RelatorioColaboradorPage }))
+)
 
 function App() {
   return (
@@ -82,6 +88,22 @@ function App() {
             element={
               <Suspense fallback={null}>
                 <EstatisticasFuncionarioPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/relatorios/setor"
+            element={
+              <Suspense fallback={null}>
+                <RelatorioSetorPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/relatorios/funcionario"
+            element={
+              <Suspense fallback={null}>
+                <RelatorioColaboradorPage />
               </Suspense>
             }
           />

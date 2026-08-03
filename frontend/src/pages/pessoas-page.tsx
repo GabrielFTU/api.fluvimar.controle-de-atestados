@@ -12,10 +12,12 @@ import { exportarCsv } from "@/lib/csv"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ListToolbar } from "@/components/list-toolbar"
+import { LimparFiltrosLink } from "@/components/limpar-filtros-link"
 import { createSelectionColumn, DataTable } from "@/components/data-table"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -251,6 +253,7 @@ export function PessoasPage() {
             ))}
           </SelectContent>
         </Select>
+        <LimparFiltrosLink onClick={() => setFiltroSetor(TODOS_OS_SETORES)} />
       </div>
 
       <DataTable
@@ -264,50 +267,53 @@ export function PessoasPage() {
       />
 
       <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editando ? "Editar pessoa" : "Nova pessoa"}</DialogTitle>
+            <DialogDescription>Cadastre um funcionário e associe a um setor.</DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-4">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome completo" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="setorId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Setor</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-5">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
                       <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione um setor" />
-                        </SelectTrigger>
+                        <Input placeholder="Nome completo" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value={SEM_SETOR}>Sem setor</SelectItem>
-                        {setores.map((setor) => (
-                          <SelectItem key={setor.id} value={setor.id}>
-                            {setor.nomeDoSetor}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="setorId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Setor</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione um setor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={SEM_SETOR}>Sem setor</SelectItem>
+                          {setores.map((setor) => (
+                            <SelectItem key={setor.id} value={setor.id}>
+                              {setor.nomeDoSetor}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <DialogFooter>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   Salvar

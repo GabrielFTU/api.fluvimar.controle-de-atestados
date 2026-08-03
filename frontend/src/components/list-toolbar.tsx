@@ -35,8 +35,8 @@ export function ListToolbar({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">{title}</h1>
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           <p className="text-muted-foreground text-sm">{description}</p>
         </div>
         <div className="flex items-center gap-2">

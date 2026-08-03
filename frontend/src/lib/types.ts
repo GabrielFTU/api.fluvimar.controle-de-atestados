@@ -146,6 +146,8 @@ export type AtestadoDetalheItem = {
   funcionarioId: string
   nomeFuncionario: string
   nomeDoSetor: string | null
+  cid: string | null
+  cidDescricao: string | null
   tipoAtestado: TipoAtestado
   classificacao: ClassificacaoAtestado
   nomeMedico: string | null
@@ -167,9 +169,10 @@ export type DetalheAtestadosFiltro = {
   classificacao?: ClassificacaoAtestado
   unidade?: Unidade
   ano?: number
-  mes?: number
+  meses?: number[]
   apenasAtivos?: boolean
   diasMinimosAfastamento?: number
+  apenasHoje?: boolean
 }
 
 export type ReincidenteItem = {

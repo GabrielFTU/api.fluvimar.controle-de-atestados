@@ -33,10 +33,15 @@ type FiltroEstatisticasComuns = {
   classificacao?: ClassificacaoAtestado
 }
 
-function montarQuery(params: Record<string, string | number | undefined>) {
+function montarQuery(params: Record<string, string | number | number[] | undefined>) {
   const query = new URLSearchParams()
   for (const [chave, valor] of Object.entries(params)) {
-    if (valor !== undefined) query.set(chave, String(valor))
+    if (valor === undefined) continue
+    if (Array.isArray(valor)) {
+      for (const item of valor) query.append(chave, String(item))
+    } else {
+      query.set(chave, String(valor))
+    }
   }
   return query.toString()
 }
@@ -191,29 +196,29 @@ export const estatisticasApi = {
     request<SerieMensalItem[]>(
       `/estatisticas/serie-mensal?${montarQuery({ ano, ...filtro })}`
     ),
-  porDiaSemana: (ano?: number, mes?: number, filtro: FiltroEstatisticasComuns = {}) =>
+  porDiaSemana: (ano?: number, meses?: number[], filtro: FiltroEstatisticasComuns = {}) =>
     request<DiaSemanaItem[]>(
-      `/estatisticas/dia-semana?${montarQuery({ ano, mes, ...filtro })}`
+      `/estatisticas/dia-semana?${montarQuery({ ano, meses, ...filtro })}`
     ),
-  porSetor: (ano?: number, mes?: number, filtro: Omit<FiltroEstatisticasComuns, "setorId"> = {}) =>
+  porSetor: (ano?: number, meses?: number[], filtro: Omit<FiltroEstatisticasComuns, "setorId"> = {}) =>
     request<SetorEstatistica[]>(
-      `/estatisticas/por-setor?${montarQuery({ ano, mes, ...filtro })}`
+      `/estatisticas/por-setor?${montarQuery({ ano, meses, ...filtro })}`
     ),
-  topFuncionarios: (ano: number, mes?: number, limite = 10, filtro: FiltroEstatisticasComuns = {}) =>
+  topFuncionarios: (ano: number, meses?: number[], limite = 10, filtro: FiltroEstatisticasComuns = {}) =>
     request<TopFuncionarioItem[]>(
-      `/estatisticas/top-funcionarios?${montarQuery({ ano, mes, limite, ...filtro })}`
+      `/estatisticas/top-funcionarios?${montarQuery({ ano, meses, limite, ...filtro })}`
     ),
-  topCids: (ano?: number, mes?: number, limite = 10, filtro: FiltroEstatisticasComuns = {}) =>
+  topCids: (ano?: number, meses?: number[], limite = 10, filtro: FiltroEstatisticasComuns = {}) =>
     request<TopCidItem[]>(
-      `/estatisticas/top-cids?${montarQuery({ ano, mes, limite, ...filtro })}`
+      `/estatisticas/top-cids?${montarQuery({ ano, meses, limite, ...filtro })}`
     ),
-  topMedicos: (ano?: number, mes?: number, limite = 10, filtro: FiltroEstatisticasComuns = {}) =>
+  topMedicos: (ano?: number, meses?: number[], limite = 10, filtro: FiltroEstatisticasComuns = {}) =>
     request<TopMedicoItem[]>(
-      `/estatisticas/top-medicos?${montarQuery({ ano, mes, limite, ...filtro })}`
+      `/estatisticas/top-medicos?${montarQuery({ ano, meses, limite, ...filtro })}`
     ),
-  porFuncionario: (funcionarioId: string, ano?: number, mes?: number) =>
+  porFuncionario: (funcionarioId: string, ano?: number, meses?: number[]) =>
     request<FuncionarioEstatistica>(
-      `/estatisticas/funcionario/${funcionarioId}?${montarQuery({ ano, mes })}`
+      `/estatisticas/funcionario/${funcionarioId}?${montarQuery({ ano, meses })}`
     ),
   detalheAtestados: (filtro: DetalheAtestadosFiltro) => {
     const params = new URLSearchParams()
@@ -225,10 +230,11 @@ export const estatisticasApi = {
     if (filtro.classificacao) params.set("classificacao", filtro.classificacao)
     if (filtro.unidade) params.set("unidade", filtro.unidade)
     if (filtro.ano) params.set("ano", String(filtro.ano))
-    if (filtro.mes !== undefined) params.set("mes", String(filtro.mes))
+    for (const mes of filtro.meses ?? []) params.append("meses", String(mes))
     if (filtro.apenasAtivos) params.set("apenasAtivos", "true")
     if (filtro.diasMinimosAfastamento !== undefined)
       params.set("diasMinimosAfastamento", String(filtro.diasMinimosAfastamento))
+    if (filtro.apenasHoje) params.set("apenasHoje", "true")
     return request<AtestadoDetalheItem[]>(`/estatisticas/atestados-detalhe?${params.toString()}`)
   },
   reincidentes: (meses = 6, minimo = 3) =>

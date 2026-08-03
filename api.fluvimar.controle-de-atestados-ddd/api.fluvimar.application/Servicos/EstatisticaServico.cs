@@ -94,11 +94,11 @@ public sealed class EstatisticaServico : IEstatisticaServico
     }
 
     public async Task<IEnumerable<EstatisticaDTO.DiaSemanaItem>> ObterPorDiaSemanaAsync(
-        int? ano, int? mes, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
+        int? ano, int[]? meses, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
     {
         var atestados = AplicarFiltrosComuns(await ObterComAfastamentoAsync(), unidade, setorId, classificacao);
         var filtrados = atestados
-            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && (!mes.HasValue || Data(a).Month == mes.Value))
+            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && ContemMes(meses, Data(a).Month))
             .ToList();
 
         return Enumerable.Range(0, 7).Select(dia => new EstatisticaDTO.DiaSemanaItem
@@ -109,11 +109,11 @@ public sealed class EstatisticaServico : IEstatisticaServico
     }
 
     public async Task<IEnumerable<EstatisticaDTO.SetorItem>> ObterPorSetorAsync(
-        int? ano, int? mes, Unidade? unidade, ClassificacaoAtestado? classificacao)
+        int? ano, int[]? meses, Unidade? unidade, ClassificacaoAtestado? classificacao)
     {
         var atestados = AplicarFiltrosComuns(await ObterComAfastamentoAsync(), unidade, null, classificacao);
         var filtrados = atestados
-            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && (!mes.HasValue || Data(a).Month == mes.Value))
+            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && ContemMes(meses, Data(a).Month))
             .ToList();
 
         return filtrados
@@ -129,10 +129,10 @@ public sealed class EstatisticaServico : IEstatisticaServico
     }
 
     public async Task<IEnumerable<EstatisticaDTO.TopFuncionarioItem>> ObterTopFuncionariosAsync(
-        int ano, int? mes, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
+        int ano, int[]? meses, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
     {
         var atestados = AplicarFiltrosComuns(await ObterComAfastamentoAsync(), unidade, setorId, classificacao)
-            .Where(a => Data(a).Year == ano && (!mes.HasValue || Data(a).Month == mes.Value));
+            .Where(a => Data(a).Year == ano && ContemMes(meses, Data(a).Month));
 
         return atestados
             .GroupBy(a => new { a.FuncionarioId, a.NomeFuncionario })
@@ -147,12 +147,12 @@ public sealed class EstatisticaServico : IEstatisticaServico
     }
 
     public async Task<IEnumerable<EstatisticaDTO.TopCidItem>> ObterTopCidsAsync(
-        int? ano, int? mes, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
+        int? ano, int[]? meses, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
     {
         var atestados = AplicarFiltrosComuns(await ObterComAfastamentoAsync(), unidade, setorId, classificacao)
             .Where(a => !string.IsNullOrWhiteSpace(a.CID));
         var filtrados = atestados
-            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && (!mes.HasValue || Data(a).Month == mes.Value));
+            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && ContemMes(meses, Data(a).Month));
 
         var contagem = filtrados
             .GroupBy(a => a.CID!)
@@ -179,12 +179,12 @@ public sealed class EstatisticaServico : IEstatisticaServico
     }
 
     public async Task<IEnumerable<EstatisticaDTO.TopMedicoItem>> ObterTopMedicosAsync(
-        int? ano, int? mes, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
+        int? ano, int[]? meses, int limite, Unidade? unidade, Guid? setorId, ClassificacaoAtestado? classificacao)
     {
         var atestados = AplicarFiltrosComuns(await ObterComAfastamentoAsync(), unidade, setorId, classificacao)
             .Where(a => a.MedicoId.HasValue);
         var filtrados = atestados
-            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && (!mes.HasValue || Data(a).Month == mes.Value));
+            .Where(a => (!ano.HasValue || Data(a).Year == ano.Value) && ContemMes(meses, Data(a).Month));
 
         var contagem = filtrados
             .GroupBy(a => new { a.MedicoId, a.NomeMedico })
@@ -212,13 +212,13 @@ public sealed class EstatisticaServico : IEstatisticaServico
         });
     }
 
-    public async Task<EstatisticaDTO.FuncionarioEstatisticaResponse> ObterPorFuncionarioAsync(Guid funcionarioId, int? ano, int? mes)
+    public async Task<EstatisticaDTO.FuncionarioEstatisticaResponse> ObterPorFuncionarioAsync(Guid funcionarioId, int? ano, int[]? meses)
     {
         var funcionario = await _funcionarioRepositorio.ObterPorIdAsync(funcionarioId);
 
         var todos = (await ObterComAfastamentoAsync()).Where(a => a.FuncionarioId == funcionarioId).ToList();
         var doAno = ano.HasValue ? todos.Where(a => Data(a).Year == ano.Value).ToList() : todos;
-        var doMesSelecionado = mes.HasValue ? doAno.Where(a => Data(a).Month == mes.Value).ToList() : doAno;
+        var doMesSelecionado = doAno.Where(a => ContemMes(meses, Data(a).Month)).ToList();
 
         var serieMensal = Enumerable.Range(1, 12).Select(mesDoAno =>
         {
@@ -256,10 +256,13 @@ public sealed class EstatisticaServico : IEstatisticaServico
 
     public async Task<IEnumerable<EstatisticaDTO.AtestadoDetalheItem>> ObterDetalheAtestadosAsync(
         string? cid, Guid? setorId, bool semSetor, Guid? funcionarioId, Guid? medicoId,
-        ClassificacaoAtestado? classificacao, Unidade? unidade, int? ano, int? mes,
-        bool apenasAtivos, int? diasMinimosAfastamento)
+        ClassificacaoAtestado? classificacao, Unidade? unidade, int? ano, int[]? meses,
+        bool apenasAtivos, int? diasMinimosAfastamento, bool apenasHoje = false)
     {
         IEnumerable<AtestadoEntity> atestados = await ObterComAfastamentoAsync();
+
+        if (apenasHoje)
+            atestados = atestados.Where(a => Data(a) == DateTime.UtcNow.Date);
 
         if (unidade.HasValue)
             atestados = atestados.Where(a => a.Funcionario.Setor != null && a.Funcionario.Setor.Unidade == unidade.Value);
@@ -284,8 +287,8 @@ public sealed class EstatisticaServico : IEstatisticaServico
         if (ano.HasValue)
             atestados = atestados.Where(a => Data(a).Year == ano.Value);
 
-        if (mes.HasValue)
-            atestados = atestados.Where(a => Data(a).Month == mes.Value);
+        if (meses is { Length: > 0 })
+            atestados = atestados.Where(a => meses.Contains(Data(a).Month));
 
         if (apenasAtivos)
         {
@@ -298,25 +301,33 @@ public sealed class EstatisticaServico : IEstatisticaServico
                 atestados = atestados.Where(a => (hoje - Data(a)).TotalDays >= diasMinimosAfastamento.Value);
         }
 
-        return atestados
-            .OrderByDescending(a => a.DiaAfastamento)
-            .Select(a => new EstatisticaDTO.AtestadoDetalheItem
-            {
-                AtestadoId = a.Id,
-                FuncionarioId = a.FuncionarioId,
-                NomeFuncionario = a.NomeFuncionario,
-                NomeDoSetor = a.Funcionario.Setor?.NomeDoSetor,
-                TipoAtestado = a.TipoAtestado,
-                Classificacao = a.Classificacao,
-                NomeMedico = a.NomeMedico,
-                DiaAfastamento = a.DiaAfastamento,
-                DiaRetorno = a.DiaRetorno,
-                HoraInicio = a.HoraInicio,
-                HoraFim = a.HoraFim,
-                TotalDiasFora = a.TotalDiasFora,
-                TotalHoras = a.TotalHoras,
-                Observacoes = a.Observacoes,
-            });
+        var lista = atestados.OrderByDescending(a => a.DiaAfastamento).ToList();
+
+        var descricoes = (await _cidRepositorio.ObterPorCodigosAsync(
+                lista.Where(a => !string.IsNullOrWhiteSpace(a.CID)).Select(a => a.CID!).Distinct()))
+            .ToDictionary(c => c.Codigo, c => c.Descricao);
+
+        return lista.Select(a => new EstatisticaDTO.AtestadoDetalheItem
+        {
+            AtestadoId = a.Id,
+            FuncionarioId = a.FuncionarioId,
+            NomeFuncionario = a.NomeFuncionario,
+            NomeDoSetor = a.Funcionario.Setor?.NomeDoSetor,
+            Cid = a.CID,
+            CidDescricao = !string.IsNullOrWhiteSpace(a.CID) && descricoes.TryGetValue(a.CID, out var descricao)
+                ? descricao
+                : null,
+            TipoAtestado = a.TipoAtestado,
+            Classificacao = a.Classificacao,
+            NomeMedico = a.NomeMedico,
+            DiaAfastamento = a.DiaAfastamento,
+            DiaRetorno = a.DiaRetorno,
+            HoraInicio = a.HoraInicio,
+            HoraFim = a.HoraFim,
+            TotalDiasFora = a.TotalDiasFora,
+            TotalHoras = a.TotalHoras,
+            Observacoes = a.Observacoes,
+        });
     }
 
     public async Task<IEnumerable<EstatisticaDTO.ReincidenteItem>> ObterReincidentesAsync(int meses, int minimoAtestados)
@@ -359,6 +370,8 @@ public sealed class EstatisticaServico : IEstatisticaServico
 
         return atestados;
     }
+
+    private static bool ContemMes(int[]? meses, int mes) => meses is not { Length: > 0 } || meses.Contains(mes);
 
     private static DateTime Data(AtestadoEntity atestado) => atestado.DiaAfastamento!.Value.Date;
 

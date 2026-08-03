@@ -34,38 +34,38 @@ public sealed class EstatisticasController : ControllerBase
 
     [HttpGet("dia-semana")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.DiaSemanaItem>>> ObterPorDiaSemana(
-        [FromQuery] int? ano, [FromQuery] int? mes, [FromQuery] Unidade? unidade, [FromQuery] Guid? setorId,
+        [FromQuery] int? ano, [FromQuery] int[]? meses, [FromQuery] Unidade? unidade, [FromQuery] Guid? setorId,
         [FromQuery] ClassificacaoAtestado? classificacao) =>
-        Ok(await _estatisticaServico.ObterPorDiaSemanaAsync(ano, mes, unidade, setorId, classificacao));
+        Ok(await _estatisticaServico.ObterPorDiaSemanaAsync(ano, meses, unidade, setorId, classificacao));
 
     [HttpGet("por-setor")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.SetorItem>>> ObterPorSetor(
-        [FromQuery] int? ano, [FromQuery] int? mes, [FromQuery] Unidade? unidade,
+        [FromQuery] int? ano, [FromQuery] int[]? meses, [FromQuery] Unidade? unidade,
         [FromQuery] ClassificacaoAtestado? classificacao) =>
-        Ok(await _estatisticaServico.ObterPorSetorAsync(ano, mes, unidade, classificacao));
+        Ok(await _estatisticaServico.ObterPorSetorAsync(ano, meses, unidade, classificacao));
 
     [HttpGet("top-funcionarios")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.TopFuncionarioItem>>> ObterTopFuncionarios(
-        [FromQuery] int ano, [FromQuery] int? mes, [FromQuery] int limite = 10, [FromQuery] Unidade? unidade = null,
+        [FromQuery] int ano, [FromQuery] int[]? meses, [FromQuery] int limite = 10, [FromQuery] Unidade? unidade = null,
         [FromQuery] Guid? setorId = null, [FromQuery] ClassificacaoAtestado? classificacao = null) =>
-        Ok(await _estatisticaServico.ObterTopFuncionariosAsync(ano, mes, limite, unidade, setorId, classificacao));
+        Ok(await _estatisticaServico.ObterTopFuncionariosAsync(ano, meses, limite, unidade, setorId, classificacao));
 
     [HttpGet("top-cids")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.TopCidItem>>> ObterTopCids(
-        [FromQuery] int? ano, [FromQuery] int? mes, [FromQuery] int limite = 10, [FromQuery] Unidade? unidade = null,
+        [FromQuery] int? ano, [FromQuery] int[]? meses, [FromQuery] int limite = 10, [FromQuery] Unidade? unidade = null,
         [FromQuery] Guid? setorId = null, [FromQuery] ClassificacaoAtestado? classificacao = null) =>
-        Ok(await _estatisticaServico.ObterTopCidsAsync(ano, mes, limite, unidade, setorId, classificacao));
+        Ok(await _estatisticaServico.ObterTopCidsAsync(ano, meses, limite, unidade, setorId, classificacao));
 
     [HttpGet("top-medicos")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.TopMedicoItem>>> ObterTopMedicos(
-        [FromQuery] int? ano, [FromQuery] int? mes, [FromQuery] int limite = 10, [FromQuery] Unidade? unidade = null,
+        [FromQuery] int? ano, [FromQuery] int[]? meses, [FromQuery] int limite = 10, [FromQuery] Unidade? unidade = null,
         [FromQuery] Guid? setorId = null, [FromQuery] ClassificacaoAtestado? classificacao = null) =>
-        Ok(await _estatisticaServico.ObterTopMedicosAsync(ano, mes, limite, unidade, setorId, classificacao));
+        Ok(await _estatisticaServico.ObterTopMedicosAsync(ano, meses, limite, unidade, setorId, classificacao));
 
     [HttpGet("funcionario/{funcionarioId:guid}")]
     public async Task<ActionResult<EstatisticaDTO.FuncionarioEstatisticaResponse>> ObterPorFuncionario(
-        Guid funcionarioId, [FromQuery] int? ano, [FromQuery] int? mes) =>
-        Ok(await _estatisticaServico.ObterPorFuncionarioAsync(funcionarioId, ano, mes));
+        Guid funcionarioId, [FromQuery] int? ano, [FromQuery] int[]? meses) =>
+        Ok(await _estatisticaServico.ObterPorFuncionarioAsync(funcionarioId, ano, meses));
 
     [HttpGet("atestados-detalhe")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.AtestadoDetalheItem>>> ObterDetalheAtestados(
@@ -77,11 +77,12 @@ public sealed class EstatisticasController : ControllerBase
         [FromQuery] ClassificacaoAtestado? classificacao,
         [FromQuery] Unidade? unidade,
         [FromQuery] int? ano,
-        [FromQuery] int? mes,
+        [FromQuery] int[]? meses,
         [FromQuery] bool apenasAtivos,
-        [FromQuery] int? diasMinimosAfastamento) =>
+        [FromQuery] int? diasMinimosAfastamento,
+        [FromQuery] bool apenasHoje = false) =>
         Ok(await _estatisticaServico.ObterDetalheAtestadosAsync(
-            cid, setorId, semSetor, funcionarioId, medicoId, classificacao, unidade, ano, mes, apenasAtivos, diasMinimosAfastamento));
+            cid, setorId, semSetor, funcionarioId, medicoId, classificacao, unidade, ano, meses, apenasAtivos, diasMinimosAfastamento, apenasHoje));
 
     [HttpGet("reincidentes")]
     public async Task<ActionResult<IEnumerable<EstatisticaDTO.ReincidenteItem>>> ObterReincidentes(

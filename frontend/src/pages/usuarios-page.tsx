@@ -15,6 +15,7 @@ import { DataTable } from "@/components/data-table"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -124,7 +125,7 @@ export function UsuariosPage() {
       id: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge variant={row.original.isActive ? "secondary" : "outline"}>
+        <Badge variant={row.original.isActive ? "success" : "outline"}>
           {row.original.isActive ? "Ativo" : "Inativo"}
         </Badge>
       ),
@@ -154,8 +155,8 @@ export function UsuariosPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Usuários</h1>
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-semibold tracking-tight">Usuários</h1>
           <p className="text-muted-foreground text-sm">
             Contas com acesso ao sistema de controle de atestados.
           </p>
@@ -175,38 +176,41 @@ export function UsuariosPage() {
       />
 
       <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Novo usuário</DialogTitle>
+            <DialogDescription>Crie uma conta de acesso ao sistema de controle de atestados.</DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-4">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome completo" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="voce@empresa.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-5">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="voce@empresa.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="senha"
@@ -224,7 +228,7 @@ export function UsuariosPage() {
                 control={form.control}
                 name="isAdmin"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start gap-2 space-y-0">
+                  <FormItem className="flex flex-row items-start gap-2 space-y-0 rounded-lg border p-3">
                     <FormControl>
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>

@@ -12,13 +12,16 @@ import { FuncionarioCombobox } from "@/components/funcionario-combobox"
 import { MedicoCombobox } from "@/components/medico-combobox"
 import type { Atestado, ClassificacaoAtestado, Funcionario, Medico, TipoAtestado } from "@/lib/types"
 import { exportarCsv } from "@/lib/csv"
+import { variantePorClassificacao } from "@/lib/badge-variants"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ListToolbar } from "@/components/list-toolbar"
+import { LimparFiltrosLink } from "@/components/limpar-filtros-link"
 import { createSelectionColumn, DataTable } from "@/components/data-table"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -56,7 +59,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { formatarData } from "@/lib/format"
+import { formatarData, formatarHoras } from "@/lib/format"
 
 const TODOS_OS_SETORES = "todos"
 const SEM_SETOR = "sem-setor"
@@ -244,7 +247,7 @@ export function AtestadosPage() {
         cabecalho: "Duração",
         valor: (atestado) =>
           atestado.tipoAtestado === "Horario"
-            ? `${atestado.totalHoras ?? 0}h (${atestado.horaInicio?.slice(0, 5) ?? ""}–${atestado.horaFim?.slice(0, 5) ?? ""})`
+            ? `${formatarHoras(atestado.totalHoras)} (${atestado.horaInicio?.slice(0, 5) ?? ""}–${atestado.horaFim?.slice(0, 5) ?? ""})`
             : `${atestado.totalDiasFora ?? 0} dia(s)`,
       },
       {
@@ -342,7 +345,7 @@ export function AtestadosPage() {
       accessorKey: "classificacao",
       header: "Classificação",
       cell: ({ row }) => (
-        <Badge variant={row.original.classificacao === "Atestado" ? "secondary" : "outline"}>
+        <Badge variant={variantePorClassificacao(row.original.classificacao)}>
           {CLASSIFICACAO_LABEL[row.original.classificacao]}
         </Badge>
       ),
@@ -378,7 +381,7 @@ export function AtestadosPage() {
         if (atestado.tipoAtestado === "Horario") {
           return (
             <div className="flex items-center gap-1.5">
-              <Badge variant="secondary">{atestado.totalHoras ?? 0}h</Badge>
+              <Badge variant="secondary">{formatarHoras(atestado.totalHoras)}</Badge>
               <span className="text-muted-foreground text-xs">
                 {atestado.horaInicio?.slice(0, 5)}–{atestado.horaFim?.slice(0, 5)}
               </span>
@@ -499,6 +502,13 @@ export function AtestadosPage() {
             ))}
           </SelectContent>
         </Select>
+        <LimparFiltrosLink
+          onClick={() => {
+            setFiltroStatus(TODOS_OS_STATUS)
+            setFiltroSetor(TODOS_OS_SETORES)
+            setFiltroClassificacao(TODAS_AS_CLASSIFICACOES)
+          }}
+        />
       </div>
 
       <DataTable
@@ -512,12 +522,15 @@ export function AtestadosPage() {
       />
 
       <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editando ? "Editar atestado" : "Novo atestado"}</DialogTitle>
+            <DialogDescription>
+              Preencha os dados do atestado, declaração ou acompanhamento médico.
+            </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-4">
+            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-5">
               <FormField
                 control={form.control}
                 name="funcionarioId"

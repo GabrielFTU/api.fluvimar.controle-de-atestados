@@ -23,6 +23,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -251,12 +252,13 @@ export function SetoresPage() {
       />
 
       <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editando ? "Editar setor" : "Novo setor"}</DialogTitle>
+            <DialogDescription>Cadastre um setor e sua unidade responsável.</DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-4">
+            <form onSubmit={form.handleSubmit(salvar)} className="flex flex-col gap-5">
               <FormField
                 control={form.control}
                 name="nomeDoSetor"
@@ -270,44 +272,46 @@ export function SetoresPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="responsavel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Responsável</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Opcional" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="unidade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unidade</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="responsavel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Responsável</FormLabel>
                       <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Input placeholder="Opcional" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value={NENHUMA_UNIDADE}>Nenhuma</SelectItem>
-                        {(Object.keys(UNIDADE_LABEL) as Unidade[]).map((unidade) => (
-                          <SelectItem key={unidade} value={unidade}>
-                            {UNIDADE_LABEL[unidade]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="unidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Unidade</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={NENHUMA_UNIDADE}>Nenhuma</SelectItem>
+                          {(Object.keys(UNIDADE_LABEL) as Unidade[]).map((unidade) => (
+                            <SelectItem key={unidade} value={unidade}>
+                              {UNIDADE_LABEL[unidade]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <DialogFooter>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   Salvar

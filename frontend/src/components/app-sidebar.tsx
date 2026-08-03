@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { BarChart3, ClipboardList, Users, Building2, FileText, UserCog } from "lucide-react"
+import { BarChart3, ClipboardList, Users, Building2, FileText, Printer, UserCog, UserRound } from "lucide-react"
 
 import { useAuth } from "@/lib/auth-context"
 import {
@@ -20,6 +20,11 @@ const consultas = [
   { title: "Estatísticas por Funcionário", url: "/estatisticas/funcionario", icon: BarChart3 },
 ]
 
+const relatorios = [
+  { title: "Por Unidade/Setor", url: "/relatorios/setor", icon: Printer },
+  { title: "Individual", url: "/relatorios/funcionario", icon: UserRound },
+]
+
 const cadastros = [
   { title: "Pessoas", url: "/pessoas", icon: Users },
   { title: "Setores", url: "/setores", icon: Building2 },
@@ -34,7 +39,7 @@ export function AppSidebar() {
   const itensCadastros = usuario?.isAdmin ? [...cadastros, cadastroUsuarios] : cadastros
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="print:hidden">
       <SidebarHeader className="gap-0 border-b py-3">
         <div className="flex items-center gap-2">
           <img src="/img/image.png" alt="Fluvimar" className="size-8 shrink-0 rounded-md object-contain" />
@@ -52,6 +57,23 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {consultas.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild tooltip={item.title} isActive={location.pathname.startsWith(item.url)}>
+                    <NavLink to={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Relatórios</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {relatorios.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild tooltip={item.title} isActive={location.pathname.startsWith(item.url)}>
                     <NavLink to={item.url}>
